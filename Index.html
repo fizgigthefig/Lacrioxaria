@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Papa's Essence-ia</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Titan+One&family=Fredoka:wght@400;600&display=swap');
+
+        :root {
+            --primary: #d63031;
+            --secondary: #0984e3;
+            --bg-color: #ffeaa7;
+            --station-bg: #dfe6e9;
+            --accent: #fdcb6e;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #2d3436;
+            font-family: 'Fredoka', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            user-select: none;
+            overflow: hidden;
+        }
+
+        #game-window {
+            width: 900px;
+            height: 600px;
+            background-color: var(--bg-color);
+            border: 8px solid #636e72;
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 40px rgba(0,0,0,0.5);
+        }
+
+        /* --- UI HEADERS --- */
+        #header {
+            height: 60px;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            border-bottom: 5px solid #b71540;
+            z-index: 100;
+            position: relative;
+        }
+
+        .stat-box {
+            background: rgba(0,0,0,0.2);
+            padding: 5px 15px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+
+        /* --- SCREENS --- */
+        .screen {
+            position: absolute;
+            top: 60px;
+            left: 0;
+            width: 100%;
+            height: 540px;
+            display: none;
+            flex-direction: column;
+        }
+        .screen.active { display: flex; }
+
+        /* --- MENU --- */
+        #menu-screen {
+            background: linear-gradient(135deg, #74b9ff, #a29bfe);
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        h1 { font-family: 'Titan One', cursive; font-size: 60px; color: white; text-shadow: 4px 4px #2d3436; margin: 0;}
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 24px;
+            font-family: 'Titan One', cursive;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px #b71540;
+            transition: transform 0.1s;
+            margin-top: 20px;
+        }
+        .btn:active { transform: translateY(4px); box-shadow: 0 2px #b71540; }
+
+        /* --- STATIONS NAV --- */
+        #station-nav {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 60px;
+            display: flex;
+        }
+        .nav-btn {
+            flex: 1;
+            border: none;
+            font-family: 'Titan One';
+            font-size: 18px;
+            cursor: pointer;
+            color: white;
+            text-transform: uppercase;
+        }
+        #nav-order { background: #00cec9; }
+        #nav-carb { background: #0984e3; }
+        #nav-essence { background: #6c5ce7; }
+        
+        .nav-btn.active { box-shadow: inset 0 -5px rgba(0,0,0,0.2); filter: brightness(0.9); }
+
+        /* --- ORDER STATION --- */
+        #order-station { background: #ffcccc; flex-direction: row; }
+        
+        #customer-view {
+            width: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        /* SQUARE CHARACTERS */
+        .character {
+            width: 140px;
+            height: 220px;
+            position: relative;
+        }
+        .head {
+            width: 100px; height: 100px; background: #fab1a0;
+            border: 4px solid #2d3436; position: absolute; top: 0; left: 20px;
+            z-index: 2;
+        }
+        .body {
+            width: 140px; height: 120px; background: #636e72;
+            border: 4px solid #2d3436; position: absolute; bottom: 0; left: 0;
+        }
+        .face {
+            position: absolute; top: 30px; left: 20px; width: 60px; height: 40px;
+        }
+        .eye { width: 10px; height: 10px; background: black; position: absolute; top: 0; }
+        .eye.left { left: 0; } .eye.right { right: 0; }
+        .mouth { width: 40px; height: 5px; background: black; position: absolute; bottom: 0; left: 10px; }
+
+        #ticket-view {
+            width: 50%;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .ticket {
+            background: #fff;
+            width: 250px;
+            padding: 20px;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.2);
+            font-family: 'Courier New', monospace;
+            transform: rotate(-2deg);
+            display: none;
+        }
+        .ticket h3 { border-bottom: 2px dashed #000; padding-bottom: 10px; margin-top: 0;}
+        .ticket-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: bold; }
+
+        /* --- CARBONATION STATION --- */
+        #carb-station { background: #81ecec; align-items: center; justify-content: center; }
+        
+        #carb-machine {
+            width: 200px; height: 300px;
+            background: #636e72;
+            border-radius: 20px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            padding-bottom: 20px;
+            border: 4px solid #2d3436;
+        }
+        
+        #carb-meter {
+            width: 40px; height: 200px;
+            background: #2d3436;
+            margin-bottom: 20px;
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 2px solid white;
+        }
+        #carb-fill {
+            width: 100%; height: 0%;
+            background: #55efc4;
+            position: absolute; bottom: 0;
+            transition: height 0.1s;
+        }
+        #carb-btn {
+            width: 120px; height: 120px;
+            border-radius: 50%;
+            background: #e17055;
+            border: 5px solid #c0392b;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: 'Titan One';
+            font-size: 20px;
+            box-shadow: 0 5px #a02c1f;
+        }
+        #carb-btn:active { transform: scale(0.95); box-shadow: 0 2px #a02c1f; }
+        
+        .bubble {
+            position: absolute; width: 10px; height: 10px;
+            background: rgba(255,255,255,0.7);
+            border-radius: 50%;
+            animation: floatUp 1s linear infinite;
+        }
+        @keyframes floatUp { from { bottom: 0; opacity: 1;} to { bottom: 100px; opacity: 0; } }
+
+        /* --- ESSENCE STATION --- */
+        #essence-station { background: #a29bfe; position: relative; }
+        
+        #cup-area {
+            position: absolute;
+            bottom: 100px; left: 50%;
+            transform: translateX(-50%);
+            width: 150px; height: 220px;
+            background: rgba(255,255,255,0.3);
+            border: 2px solid white;
+            border-radius: 10px 10px 30px 30px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column-reverse;
+        }
+        
+        #water-level { width: 100%; background: #dfe6e9; transition: height 0.5s; opacity: 0.8; height: 0%; }
+        
+        #flavor-controls {
+            position: absolute; top: 20px; width: 100%;
+            display: flex; justify-content: center; gap: 10px;
+        }
+        
+        .flavor-btn {
+            width: 80px; height: 80px;
+            border-radius: 10px;
+            border: 3px solid white;
+            cursor: pointer;
+            color: white; font-weight: bold;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            font-size: 12px;
+            box-shadow: 0 4px rgba(0,0,0,0.2);
+        }
+        .flavor-btn:active { transform: scale(0.95); }
+
+        #essence-cloud {
+            position: absolute; top: 150px; left: 50%;
+            transform: translateX(-50%);
+            width: 200px; height: 100px;
+            background: rgba(255,255,255,0.0);
+            border-radius: 50%;
+            pointer-events: none;
+            transition: background 0.5s;
+            filter: blur(20px);
+            display: flex; justify-content: center; align-items: center;
+            color: rgba(0,0,0,0.5);
+            font-weight: bold;
+        }
+
+        #controls-bottom {
+            position: absolute; bottom: 20px; width: 100%;
+            display: flex; justify-content: space-around;
+        }
+        
+        /* --- RESULTS --- */
+        #result-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 200;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        #quote-bubble {
+            background: white; color: black;
+            padding: 20px; border-radius: 20px;
+            margin: 20px; max-width: 60%;
+            font-style: italic;
+            position: relative;
+        }
+        #quote-bubble:after {
+            content: ''; position: absolute; bottom: -10px; left: 50%;
+            border-width: 10px 10px 0; border-style: solid;
+            border-color: white transparent; display: block; width: 0;
+        }
+
+    </style>
+</head>
+<body>
+
+<div id="game-window">
+    <div id="header">
+        <div class="stat-box">Day: <span id="day-val">1</span></div>
+        <div style="font-family:'Titan One'; font-size: 24px;">Papa's Essence-ia</div>
+        <div class="stat-box">Tips: $<span id="money-val">0.00</span></div>
+    </div>
+
+    <div id="menu-screen" class="screen active">
+        <h1>Papa's<br>Essence-ia</h1>
+        <p style="color: white; font-size: 18px;">"Taste the memory of a flavor!"</p>
+        <button class="btn" onclick="startGame()">Start Carbonating</button>
+        <div style="margin-top: 20px; color: white;">
+            <small>Upgrade Shop opens after every shift!</small>
+        </div>
+    </div>
+
+    <div id="station-nav" style="display:none;">
+        <button class="nav-btn" id="nav-order" onclick="switchStation('order')">Order Station</button>
+        <button class="nav-btn" id="nav-carb" onclick="switchStation('carb')">Carbonation</button>
+        <button class="nav-btn" id="nav-essence" onclick="switchStation('essence')">Essence Station</button>
+    </div>
+
+    <div id="order-station" class="screen">
+        <div id="customer-view">
+            <div id="customer" style="display:none;" class="character">
+                <div class="head">
+                    <div class="face">
+                        <div class="eye left"></div>
+                        <div class="eye right"></div>
+                        <div class="mouth"></div>
+                    </div>
+                </div>
+                <div class="body"></div>
+            </div>
+            <button id="take-order-btn" class="btn" onclick="takeOrder()" style="display:none;">Take Order</button>
+        </div>
+        <div id="ticket-view">
+            <div id="ticket-display" class="ticket">
+                <h3>TICKET #<span id="t-num">101</span></h3>
+                <div class="ticket-row"><span>Size:</span> <span id="t-size">--</span></div>
+                <div class="ticket-row"><span>Ice:</span> <span id="t-ice">--</span></div>
+                <div class="ticket-row"><span>Carb:</span> <span id="t-carb">--</span></div>
+                <div class="ticket-row"><span>Flavor:</span> <span id="t-flavor">--</span></div>
+                <div class="ticket-row"><span>Intensity:</span> <span id="t-intensity">--</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="carb-station" class="screen">
+        <div style="text-align:center; margin-bottom: 20px;">
+            <h2>Mash Button to Carbonate!</h2>
+            <div style="font-size: 20px;">Target: <span id="target-carb">0</span>%</div>
+        </div>
+        <div id="carb-machine">
+            <div id="carb-meter"><div id="carb-fill"></div></div>
+            <button id="carb-btn" onmousedown="pumpCarb()">PUMP!</button>
+        </div>
+        <div style="margin-top: 20px; font-weight:bold;">Current: <span id="current-carb">0</span>%</div>
+    </div>
+
+    <div id="essence-station" class="screen">
+        <div id="flavor-controls">
+            <button class="flavor-btn" style="background:#ff7675;" onmousedown="startBlowing('Grapefruit')" onmouseup="stopBlowing()" onmouseleave="stopBlowing()">🌬️<br>Grapefruit</button>
+            <button class="flavor-btn" style="background:#55efc4;" onmousedown="startBlowing('Lime')" onmouseup="stopBlowing()" onmouseleave="stopBlowing()">🌬️<br>Lime</button>
+            <button class="flavor-btn" style="background:#fdcb6e;" onmousedown="startBlowing('Lemon')" onmouseup="stopBlowing()" onmouseleave="stopBlowing()">🌬️<br>Lemon</button>
+            <button class="flavor-btn" style="background:#a29bfe;" onmousedown="startBlowing('Berry')" onmouseup="stopBlowing()" onmouseleave="stopBlowing()">🌬️<br>Berry</button>
+        </div>
+
+        <div id="essence-cloud"></div>
+        
+        <div id="cup-area">
+            <div id="water-level"></div>
+        </div>
+
+        <div style="position: absolute; top: 120px; right: 20px; background: rgba(255,255,255,0.5); padding: 10px; border-radius: 10px;">
+            <div>Essence Level: <span id="essence-meter">0</span>%</div>
+        </div>
+
+        <div id="controls-bottom">
+            <div>
+                <label>Ice Amount:</label><br>
+                <input type="range" id="ice-slider" min="0" max="100" value="0">
+            </div>
+            <button class="btn" style="padding: 10px 20px; font-size: 18px;" onclick="serveDrink()">SERVE DRINK</button>
+        </div>
+    </div>
+
+    <div id="result-overlay">
+        <h2>Customer Review</h2>
+        <div id="customer-result" class="character" style="transform: scale(0.8);">
+            <div class="head"><div class="face"><div class="eye left"></div><div class="eye right"></div><div class="mouth"></div></div></div>
+            <div class="body"></div>
+        </div>
+        <div id="quote-bubble">"It tastes like a battery!"</div>
+        <div style="display:flex; gap: 20px; text-align: left;">
+            <div>
+                <div>Carb Accuracy: <span id="res-carb">0</span>%</div>
+                <div>Flavor Match: <span id="res-flav">0</span>%</div>
+                <div>Ice Accuracy: <span id="res-ice">0</span>%</div>
+            </div>
+        </div>
+        <h1 style="color: #fdcb6e; margin-top: 10px;">Tip: $<span id="res-tip">0.00</span></h1>
+        <button class="btn" onclick="nextCustomer()">Next Customer</button>
+    </div>
+
+    <div id="shop-screen" class="screen" style="background: #fab1a0; align-items: center; justify-content: center;">
+        <h1>The Essence Store</h1>
+        <div>Current Cash: $<span id="shop-money">0</span></div>
+        <div style="display:flex; gap: 20px; margin-top: 20px;">
+            <div style="background: white; padding: 20px; border-radius: 10px; text-align: center;">
+                <h3>Turbo Pump</h3>
+                <p>Carbonate 2x Faster</p>
+                <button class="btn" style="font-size: 16px;" onclick="buyUpgrade('pump', 50)">$50.00</button>
+            </div>
+            <div style="background: white; padding: 20px; border-radius: 10px; text-align: center;">
+                <h3>Pure Essence</h3>
+                <p>Flavor pays 1.5x Tips</p>
+                <button class="btn" style="font-size: 16px;" onclick="buyUpgrade('flavor', 100)">$100.00</button>
+            </div>
+        </div>
+        <button class="btn" style="margin-top: 40px; background: #636e72;" onclick="startDay()">Start Next Day</button>
+    </div>
+
+</div>
+
+<script>
+    // --- GAME STATE ---
+    let money = 0;
+    let day = 1;
+    let customersServed = 0;
+    let totalCustomers = 3; // Increases with levels
+    
+    // Upgrades
+    let upgrades = {
+        pumpSpeed: 2,
+        flavorMult: 1
+    };
+
+    // Current Order Data
+    let order = null;
+    let build = {
+        carb: 0,
+        flavorType: null,
+        flavorIntensity: 0,
+        ice: 0
+    };
+
+    // --- UTILS ---
+    const getEl = (id) => document.getElementById(id);
+    const switchStation = (id) => {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        if(id === 'order') getEl('order-station').classList.add('active');
+        if(id === 'carb') getEl('carb-station').classList.add('active');
+        if(id === 'essence') getEl('essence-station').classList.add('active');
+        
+        // Button Highlight
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        getEl('nav-'+id).classList.add('active');
+    };
+
+    // --- GAME LOOP ---
+    function startGame() {
+        getEl('menu-screen').classList.remove('active');
+        getEl('station-nav').style.display = 'flex';
+        startDay();
+    }
+
+    function startDay() {
+        getEl('shop-screen').classList.remove('active');
+        switchStation('order');
+        day++;
+        customersServed = 0;
+        getEl('day-val').innerText = day;
+        
+        // Level logic: More customers per day
+        totalCustomers = 2 + day; 
+        
+        nextCustomer(true); // true = start of day
+    }
+
+    function nextCustomer(first = false) {
+        getEl('result-overlay').style.display = 'none';
+        
+        if(!first && customersServed >= totalCustomers) {
+            // End of day
+            openShop();
+            return;
+        }
+
+        // Reset Build
+        build = { carb: 0, flavorType: null, flavorIntensity: 0, ice: 0 };
+        getEl('carb-fill').style.height = '0%';
+        getEl('current-carb').innerText = '0';
+        getEl('water-level').style.height = '0%';
+        getEl('water-level').style.backgroundColor = '#dfe6e9';
+        getEl('essence-meter').innerText = '0';
+        getEl('ice-slider').value = 0;
+        getEl('ticket-display').style.display = 'none';
+        getEl('take-order-btn').style.display = 'block';
+
+        // Spawn Customer (Visual)
+        const cust = getEl('customer');
+        cust.style.display = 'block';
+        // Randomize Square Colors
+        cust.querySelector('.head').style.backgroundColor = `hsl(${Math.random()*360}, 70%, 80%)`;
+        cust.querySelector('.body').style.backgroundColor = `hsl(${Math.random()*360}, 50%, 50%)`;
+        
+        // Generate Order Logic
+        const flavors = ['Grapefruit', 'Lime', 'Lemon', 'Berry'];
+        const sizes = ['Small', 'Medium', 'Large'];
+        const intensities = ['Hint', 'Whisper', 'Memory', 'Thought'];
+        
+        order = {
+            size: sizes[Math.floor(Math.random()*sizes.length)],
+            ice: Math.floor(Math.random()*100),
+            carb: Math.floor(Math.random()*60) + 40, // 40-100%
+            flavor: flavors[Math.floor(Math.random()*flavors.length)],
+            intensity: Math.floor(Math.random() * 80) + 10 // 10-90%
+        };
+
+        customersServed++;
+    }
+
+    function takeOrder() {
+        getEl('take-order-btn').style.display = 'none';
+        getEl('ticket-display').style.display = 'block';
+        
+        // Fill Ticket
+        getEl('t-num').innerText = Math.floor(Math.random()*900)+100;
+        getEl('t-size').innerText = order.size;
+        getEl('t-ice').innerText = order.ice + "%";
+        getEl('t-carb').innerText = order.carb + "%";
+        getEl('t-flavor').innerText = order.flavor;
+        
+        // Map intensity number to text
+        let intText = "Hint";
+        if(order.intensity > 30) intText = "Whisper";
+        if(order.intensity > 60) intText = "Shout";
+        getEl('t-intensity').innerText = intText + ` (${order.intensity}%)`;
+        getEl('target-carb').innerText = order.carb;
+        
+        // Set Cup Size Visually
+        let h = "180px";
+        if(order.size === 'Small') h = "140px";
+        if(order.size === 'Large') h = "220px";
+        getEl('cup-area').style.height = h;
+    }
+
+    // --- STATIONS LOGIC ---
+    
+    // Carbonation
+    function pumpCarb() {
+        if(build.carb >= 100) return;
+        build.carb += upgrades.pumpSpeed;
+        if(build.carb > 100) build.carb = 100;
+        getEl('carb-fill').style.height = build.carb + "%";
+        getEl('current-carb').innerText = Math.floor(build.carb);
+        
+        // Visual bubbles
+        let b = document.createElement('div');
+        b.className = 'bubble';
+        b.style.left = Math.random()*100 + "%";
+        getEl('carb-meter').appendChild(b);
+        setTimeout(() => b.remove(), 1000);
+    }
+
+    // Essence
+    let blowInterval = null;
+    function startBlowing(flavor) {
+        if(build.flavorType && build.flavorType !== flavor) {
+            alert("You already blew " + build.flavorType + " on this!");
+            return;
+        }
+        build.flavorType = flavor;
+        
+        // Visual Cloud
+        const cloud = getEl('essence-cloud');
+        cloud.innerText = flavor + " Essence";
+        cloud.style.backgroundColor = "rgba(255,255,255,0.6)";
+        
+        // Logic
+        blowInterval = setInterval(() => {
+            if(build.flavorIntensity >= 100) return;
+            build.flavorIntensity += 0.5;
+            getEl('essence-meter').innerText = Math.floor(build.flavorIntensity);
+            
+            // Fill cup slightly with water to show progress
+            getEl('water-level').style.height = "80%"; // Base water level
+        }, 50);
+    }
+
+    function stopBlowing() {
+        clearInterval(blowInterval);
+        getEl('essence-cloud').style.backgroundColor = "rgba(255,255,255,0.0)";
+        getEl('essence-cloud').innerText = "";
+    }
+
+    function serveDrink() {
+        build.ice = parseInt(getEl('ice-slider').value);
+        
+        // Calculate Score
+        // 1. Carb Score
+        let carbDiff = Math.abs(order.carb - build.carb);
+        let carbScore = Math.max(0, 100 - (carbDiff * 2));
+
+        // 2. Flavor Score
+        let flavScore = 0;
+        if(build.flavorType === order.flavor) {
+            let intDiff = Math.abs(order.intensity - build.flavorIntensity);
+            flavScore = Math.max(0, 100 - (intDiff * 2));
+        }
+
+        // 3. Ice Score
+        let iceDiff = Math.abs(order.ice - build.ice);
+        let iceScore = Math.max(0, 100 - (iceDiff));
+
+        let totalScore = (carbScore + flavScore + iceScore) / 3;
+        
+        // Tip Calculation
+        let baseTip = 5.00;
+        let finalTip = (baseTip * (totalScore/100)) * upgrades.flavorMult;
+        money += finalTip;
+        getEl('money-val').innerText = money.toFixed(2);
+
+        // Show Results
+        getEl('res-carb').innerText = Math.floor(carbScore);
+        getEl('res-flav').innerText = Math.floor(flavScore);
+        getEl('res-ice').innerText = Math.floor(iceScore);
+        getEl('res-tip').innerText = finalTip.toFixed(2);
+
+        // Funny Quotes
+        const quotes = [
+            `"It tastes like I'm sitting near a basket of ${build.flavorType || 'nothing'}."`,
+            `"Hints of static TV and a ghost of a ${build.flavorType || 'fruit'}."`,
+            `"It tastes like someone yelled '${build.flavorType || 'WATER'}' from the basement."`,
+            `"Deliciously disappointing, just like I ordered."`
+        ];
+        
+        let q = quotes[Math.floor(Math.random()*quotes.length)];
+        if(flavScore < 30) q = "\"This has too much flavor! I wanted faint disappointment!\"";
+        
+        getEl('quote-bubble').innerText = q;
+        getEl('result-overlay').style.display = 'flex';
+    }
+
+    // --- SHOP LOGIC ---
+    function openShop() {
+        getEl('shop-money').innerText = money.toFixed(2);
+        getEl('shop-screen').classList.add('active');
+        getEl('station-nav').style.display = 'none';
+    }
+
+    function buyUpgrade(type, cost) {
+        if(money >= cost) {
+            money -= cost;
+            getEl('shop-money').innerText = money.toFixed(2);
+            getEl('money-val').innerText = money.toFixed(2);
+            
+            if(type === 'pump') {
+                upgrades.pumpSpeed += 2;
+                alert("Pump Upgraded!");
+            }
+            if(type === 'flavor') {
+                upgrades.flavorMult += 0.5;
+                alert("Premium Essence Purchased!");
+            }
+        } else {
+            alert("Not enough money!");
+        }
+    }
+
+</script>
+</body>
+</html>
