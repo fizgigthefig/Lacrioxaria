@@ -3,688 +3,610 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Papa's Essence-ia</title>
+    <title>Papa's Fizzeria - LaCroix Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Chewy&family=Fredoka+One&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Titan+One&family=Fredoka:wght@400;600&display=swap');
-
         :root {
-            --primary: #d63031;
-            --secondary: #0984e3;
-            --bg-color: #ffeaa7;
-            --station-bg: #dfe6e9;
-            --accent: #fdcb6e;
+            --primary: #FF6B6B;
+            --secondary: #4ECDC4;
+            --accent: #FFE66D;
+            --dark: #2C3E50;
+            --light: #F7F9F9;
+            --can-pamp: #FF9F43;
+            --can-lime: #2ECC71;
+            --can-lemon: #F1C40F;
+            --can-berry: #9B59B6;
         }
 
         body {
+            font-family: 'Fredoka One', cursive;
+            background-color: #333;
             margin: 0;
-            padding: 0;
-            background-color: #2d3436;
-            font-family: 'Fredoka', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            user-select: none;
             overflow: hidden;
+            user-select: none;
         }
 
-        #game-window {
-            width: 900px;
+        #game-container {
+            width: 800px;
             height: 600px;
-            background-color: var(--bg-color);
-            border: 8px solid #636e72;
-            border-radius: 15px;
+            background-color: var(--light);
+            border: 8px solid var(--dark);
+            border-radius: 20px;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 0 40px rgba(0,0,0,0.5);
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
         }
 
-        /* --- UI HEADERS --- */
-        #header {
-            height: 60px;
+        /* --- UI ELEMENTS --- */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .screen.active {
+            pointer-events: all;
+            opacity: 1;
+            z-index: 10;
+        }
+
+        h1, h2 {
+            font-family: 'Chewy', cursive;
+            text-align: center;
+            color: var(--dark);
+            text-shadow: 2px 2px var(--accent);
+        }
+
+        button {
+            font-family: 'Fredoka One', cursive;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.1s;
+            outline: none;
+        }
+        button:active { transform: scale(0.95); }
+
+        .btn-large {
+            padding: 15px 40px;
+            font-size: 24px;
             background-color: var(--primary);
+            color: white;
+            border-radius: 50px;
+            border-bottom: 5px solid #c0392b;
+            margin: 10px;
+        }
+
+        /* --- TOP BAR --- */
+        #top-bar {
+            height: 60px;
+            background-color: var(--dark);
             color: white;
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 0 20px;
-            border-bottom: 5px solid #b71540;
+            font-size: 20px;
             z-index: 100;
-            position: relative;
         }
 
-        .stat-box {
-            background: rgba(0,0,0,0.2);
-            padding: 5px 15px;
-            border-radius: 10px;
-            font-weight: bold;
-        }
-
-        /* --- SCREENS --- */
-        .screen {
-            position: absolute;
-            top: 60px; /* Below Header */
-            left: 0;
-            width: 100%;
-            height: 480px; /* Leave 60px at bottom for Nav */
-            display: none;
-            flex-direction: column;
-        }
-        .screen.active { display: flex; }
-
-        /* --- MENU --- */
+        /* --- MENU SCREEN --- */
         #menu-screen {
-            height: 540px; /* Full height covering nav */
-            background: linear-gradient(135deg, #74b9ff, #a29bfe);
+            background: radial-gradient(circle, var(--secondary) 0%, var(--primary) 100%);
             justify-content: center;
             align-items: center;
-            text-align: center;
-            z-index: 200; /* On top of everything */
         }
-        h1 { font-family: 'Titan One', cursive; font-size: 60px; color: white; text-shadow: 4px 4px #2d3436; margin: 0;}
-        .btn {
-            background: var(--primary);
+        #title-logo {
+            font-size: 80px;
             color: white;
-            border: none;
-            padding: 15px 40px;
-            font-size: 24px;
-            font-family: 'Titan One', cursive;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 6px #b71540;
-            transition: transform 0.1s;
-            margin-top: 20px;
+            text-shadow: 5px 5px var(--dark);
+            margin-bottom: 20px;
+            transform: rotate(-5deg);
         }
-        .btn:active { transform: translateY(4px); box-shadow: 0 2px #b71540; }
 
-        /* --- STATIONS NAV --- */
-        #station-nav {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            height: 60px;
-            display: flex;
-            z-index: 150; /* FIXED: Now sits above screens */
-            border-top: 4px solid #636e72;
+        /* --- GAME SCREEN --- */
+        #game-screen {
+            flex-direction: row;
         }
-        .nav-btn {
-            flex: 1;
-            border: none;
-            font-family: 'Titan One';
-            font-size: 18px;
-            cursor: pointer;
-            color: white;
-            text-transform: uppercase;
-            transition: background 0.2s;
-        }
-        #nav-order { background: #00cec9; }
-        #nav-carb { background: #0984e3; }
-        #nav-essence { background: #6c5ce7; }
         
-        .nav-btn:hover { filter: brightness(1.1); }
-        .nav-btn.active { box-shadow: inset 0 -5px rgba(0,0,0,0.2); filter: brightness(0.9); border-top: 5px solid white; margin-top: -5px; padding-top: 5px;}
-
-        /* --- ORDER STATION --- */
-        #order-station { background: #ffcccc; flex-direction: row; }
-        
-        #customer-view {
-            width: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-        }
-
-        /* SQUARE CHARACTERS */
-        .character {
-            width: 140px;
-            height: 220px;
-            position: relative;
-        }
-        .head {
-            width: 100px; height: 100px; background: #fab1a0;
-            border: 4px solid #2d3436; position: absolute; top: 0; left: 20px;
-            z-index: 2;
-        }
-        .body {
-            width: 140px; height: 120px; background: #636e72;
-            border: 4px solid #2d3436; position: absolute; bottom: 0; left: 0;
-        }
-        .face {
-            position: absolute; top: 30px; left: 20px; width: 60px; height: 40px;
-        }
-        .eye { width: 10px; height: 10px; background: black; position: absolute; top: 0; }
-        .eye.left { left: 0; } .eye.right { right: 0; }
-        .mouth { width: 40px; height: 5px; background: black; position: absolute; bottom: 0; left: 10px; }
-
-        #ticket-view {
-            width: 50%;
-            padding: 40px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-        }
-
-        .ticket {
-            background: #fff;
+        #order-station {
             width: 250px;
-            padding: 20px;
-            box-shadow: 2px 2px 10px rgba(0,0,0,0.2);
-            font-family: 'Courier New', monospace;
-            transform: rotate(-2deg);
-            display: none;
-            border: 1px solid #ccc;
+            background-color: #eee;
+            border-right: 4px solid var(--dark);
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-        .ticket h3 { border-bottom: 2px dashed #000; padding-bottom: 10px; margin-top: 0;}
-        .ticket-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: bold; }
 
-        /* --- CARBONATION STATION --- */
-        #carb-station { background: #81ecec; align-items: center; justify-content: center; }
-        
-        #carb-machine {
-            width: 200px; height: 280px;
-            background: #636e72;
-            border-radius: 20px;
+        #ticket {
+            width: 200px;
+            background: #fff;
+            border: 1px solid #ccc;
+            padding: 15px;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+            margin-top: 20px;
+            transform-origin: top center;
+            animation: swing 1s ease-out;
+            display: none;
+        }
+        @keyframes swing {
+            0% { transform: rotateX(-90deg); }
+            100% { transform: rotateX(0deg); }
+        }
+
+        .ticket-header { border-bottom: 2px dashed #999; padding-bottom: 10px; margin-bottom: 10px; }
+        .ticket-item { font-size: 18px; margin: 5px 0; color: #555; }
+        .ticket-item span { font-weight: bold; color: var(--dark); }
+
+        #build-station {
+            flex-grow: 1;
+            background-color: #DFF9FB;
             position: relative;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: flex-end;
             padding-bottom: 20px;
-            border: 4px solid #2d3436;
         }
-        
-        #carb-meter {
-            width: 40px; height: 180px;
-            background: #2d3436;
-            margin-bottom: 20px;
-            position: relative;
-            border-radius: 20px;
-            overflow: hidden;
-            border: 2px solid white;
+
+        /* Ingredients Bar */
+        #ingredients-bar {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 300px;
+            background: rgba(255,255,255,0.9);
+            border-radius: 15px;
+            padding: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
         }
-        #carb-fill {
-            width: 100%; height: 0%;
-            background: #55efc4;
-            position: absolute; bottom: 0;
-            transition: height 0.1s;
-        }
-        #carb-btn {
-            width: 100px; height: 100px;
+
+        .ingredient-btn {
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
-            background: #e17055;
-            border: 5px solid #c0392b;
+            border: 3px solid white;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+            font-size: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
             color: white;
             font-weight: bold;
-            cursor: pointer;
-            font-family: 'Titan One';
-            font-size: 18px;
-            box-shadow: 0 5px #a02c1f;
         }
-        #carb-btn:active { transform: scale(0.95); box-shadow: 0 2px #a02c1f; }
-        
-        .bubble {
-            position: absolute; width: 10px; height: 10px;
-            background: rgba(255,255,255,0.7);
-            border-radius: 50%;
-            animation: floatUp 1s linear infinite;
-        }
-        @keyframes floatUp { from { bottom: 0; opacity: 1;} to { bottom: 100px; opacity: 0; } }
 
-        /* --- ESSENCE STATION --- */
-        #essence-station { background: #a29bfe; position: relative; }
+        .flavor-pamp { background: var(--can-pamp); }
+        .flavor-lime { background: var(--can-lime); }
+        .flavor-berry { background: var(--can-berry); }
+        .flavor-lemon { background: var(--can-lemon); }
         
-        #cup-area {
+        .ice-btn { background: #74b9ff; border-radius: 10px; width: 80px;}
+
+        /* Cup Assembly */
+        #counter-area {
+            width: 100%;
+            height: 150px;
+            background: #95a5a6;
             position: absolute;
-            bottom: 80px; left: 50%;
+            bottom: 0;
+            border-top: 5px solid #7f8c8d;
+        }
+
+        #cup-container {
+            width: 120px;
+            height: 180px;
+            background: rgba(255, 255, 255, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            border-radius: 10px 10px 20px 20px;
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
             transform: translateX(-50%);
-            width: 150px; height: 220px;
-            background: rgba(255,255,255,0.3);
-            border: 2px solid white;
-            border-radius: 10px 10px 30px 30px;
             overflow: hidden;
             display: flex;
             flex-direction: column-reverse;
+            align-items: center;
+            justify-content: flex-start;
         }
-        
-        #water-level { width: 100%; background: #dfe6e9; transition: height 0.5s; opacity: 0.8; height: 0%; }
-        
-        #flavor-controls {
-            position: absolute; top: 20px; width: 100%;
-            display: flex; justify-content: center; gap: 10px;
-        }
-        
-        .flavor-btn {
-            width: 80px; height: 80px;
-            border-radius: 10px;
-            border: 3px solid white;
-            cursor: pointer;
-            color: white; font-weight: bold;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            font-size: 12px;
-            box-shadow: 0 4px rgba(0,0,0,0.2);
-        }
-        .flavor-btn:active { transform: scale(0.95); }
 
-        #essence-cloud {
-            position: absolute; top: 120px; left: 50%;
-            transform: translateX(-50%);
-            width: 200px; height: 100px;
-            background: rgba(255,255,255,0.0);
-            border-radius: 50%;
-            pointer-events: none;
-            transition: background 0.5s;
-            filter: blur(20px);
-            display: flex; justify-content: center; align-items: center;
-            color: rgba(0,0,0,0.5);
+        .liquid {
+            width: 100%;
+            height: 0%;
+            transition: height 0.5s, background-color 0.5s;
+            opacity: 0.8;
+        }
+
+        .ice-cube {
+            width: 20px; 
+            height: 20px; 
+            background: rgba(255,255,255,0.8);
+            border: 1px solid white;
+            position: absolute;
+            bottom: 10px;
+            border-radius: 3px;
+        }
+        .ice-crushed {
+            width: 10px; height: 10px; border-radius: 50%;
+            background: rgba(255,255,255,0.9);
+            position: absolute;
+        }
+
+        #serve-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: var(--can-lime);
+            z-index: 50;
+        }
+
+        /* --- SHOP SCREEN --- */
+        #shop-screen {
+            background-color: #81ecec;
+            padding: 40px;
+            overflow-y: auto;
+        }
+        
+        .shop-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .upgrade-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            border-bottom: 5px solid #bdc3c7;
+            text-align: center;
+        }
+
+        .upgrade-card.purchased {
+            opacity: 0.6;
+            filter: grayscale(1);
+        }
+
+        .price-tag {
+            background: var(--accent);
+            color: var(--dark);
+            padding: 5px 10px;
+            border-radius: 5px;
             font-weight: bold;
         }
 
-        #controls-bottom {
-            position: absolute; bottom: 10px; width: 100%;
-            display: flex; justify-content: space-around;
-            background: rgba(255,255,255,0.3);
-            padding: 10px 0;
-        }
-        
-        /* --- RESULTS --- */
-        #result-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9);
-            z-index: 300;
+        /* --- FEEDBACK OVERLAY --- */
+        #feedback-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
             display: none;
             flex-direction: column;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             color: white;
+            z-index: 200;
         }
-        #quote-bubble {
-            background: white; color: black;
-            padding: 20px; border-radius: 20px;
-            margin: 20px; max-width: 60%;
-            font-style: italic;
-            position: relative;
-        }
-        #quote-bubble:after {
-            content: ''; position: absolute; bottom: -10px; left: 50%;
-            border-width: 10px 10px 0; border-style: solid;
-            border-color: white transparent; display: block; width: 0;
+        .score-circle {
+            width: 100px; height: 100px;
+            border-radius: 50%;
+            border: 5px solid white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 40px;
+            margin-bottom: 20px;
+            background: var(--primary);
         }
 
     </style>
 </head>
 <body>
 
-<div id="game-window">
-    <div id="header">
-        <div class="stat-box">Day: <span id="day-val">1</span></div>
-        <div style="font-family:'Titan One'; font-size: 24px;">Papa's Essence-ia</div>
-        <div class="stat-box">Tips: $<span id="money-val">0.00</span></div>
+<div id="game-container">
+    <div id="top-bar">
+        <div>Day: <span id="day-display">1</span></div>
+        <div style="font-family:'Chewy'; font-size:28px;">Papa's Fizzeria</div>
+        <div>Money: $<span id="money-display">0</span></div>
     </div>
 
     <div id="menu-screen" class="screen active">
-        <h1>Papa's<br>Essence-ia</h1>
-        <p style="color: white; font-size: 18px;">"Taste the memory of a flavor!"</p>
-        <button class="btn" onclick="startGame()">Start Carbonating</button>
-        <div style="margin-top: 20px; color: white;">
-            <small>Upgrade Shop opens after every shift!</small>
+        <div id="title-logo">Papa's<br>Fizzeria</div>
+        <button class="btn-large" onclick="startGame()">PLAY</button>
+    </div>
+
+    <div id="game-screen" class="screen">
+        <div id="order-station">
+            <h2>Orders</h2>
+            <div id="customer-area" style="font-size:80px; margin: 10px;">👤</div>
+            <div id="ticket">
+                <div class="ticket-header">Ticket #<span id="ticket-id">001</span></div>
+                <div class="ticket-item">Base: <span id="req-base">Pamplemousse</span></div>
+                <div class="ticket-item">Mix-in: <span id="req-mix">None</span></div>
+                <div class="ticket-item">Ice: <span id="req-ice">Cubed</span></div>
+            </div>
+            <button id="next-customer-btn" class="btn-large" style="font-size:16px; display:none;" onclick="nextCustomer()">Next Order</button>
         </div>
-    </div>
 
-    <div id="station-nav" style="display:none;">
-        <button class="nav-btn" id="nav-order" onclick="switchStation('order')">Order Station</button>
-        <button class="nav-btn" id="nav-carb" onclick="switchStation('carb')">Carbonation</button>
-        <button class="nav-btn" id="nav-essence" onclick="switchStation('essence')">Essence Station</button>
-    </div>
+        <div id="build-station">
+            <div id="ingredients-bar">
+                <div style="width:100%; text-align:center; margin-bottom:5px; font-size:14px; color:#777;">BASES & MIX-INS</div>
+                <button class="ingredient-btn flavor-pamp" onclick="addFlavor('Pamplemousse', '#FF9F43')">Pamp</button>
+                <button class="ingredient-btn flavor-lime" onclick="addFlavor('Lime', '#2ECC71')">Lime</button>
+                <button class="ingredient-btn flavor-lemon" onclick="addFlavor('Lemon', '#F1C40F')">Lemon</button>
+                <button class="ingredient-btn flavor-berry" onclick="addFlavor('Berry', '#9B59B6')">Berry</button>
+                
+                <div style="width:100%; text-align:center; margin:5px 0; font-size:14px; color:#777;">ICE</div>
+                <button class="ingredient-btn ice-btn" onclick="addIce('Cubed')">Cubed</button>
+                <button id="btn-crushed" class="ingredient-btn ice-btn" style="display:none; background:#74b9ff;" onclick="addIce('Crushed')">Crushed</button>
+                
+                <button class="ingredient-btn" style="background:#e74c3c; width: 40px; height: 40px; font-size: 20px;" onclick="resetCup()">🗑️</button>
+            </div>
 
-    <div id="order-station" class="screen">
-        <div id="customer-view">
-            <div id="customer" style="display:none;" class="character">
-                <div class="head">
-                    <div class="face">
-                        <div class="eye left"></div>
-                        <div class="eye right"></div>
-                        <div class="mouth"></div>
-                    </div>
+            <div id="cup-container">
+                <div id="cup-liquid" class="liquid"></div>
                 </div>
-                <div class="body"></div>
-            </div>
-            <button id="take-order-btn" class="btn" onclick="takeOrder()" style="display:none;">Take Order</button>
-        </div>
-        <div id="ticket-view">
-            <div id="ticket-display" class="ticket">
-                <h3>TICKET #<span id="t-num">101</span></h3>
-                <div class="ticket-row"><span>Size:</span> <span id="t-size">--</span></div>
-                <div class="ticket-row"><span>Ice:</span> <span id="t-ice">--</span></div>
-                <div class="ticket-row"><span>Carb:</span> <span id="t-carb">--</span></div>
-                <div class="ticket-row"><span>Flavor:</span> <span id="t-flavor">--</span></div>
-                <div class="ticket-row"><span>Intensity:</span> <span id="t-intensity">--</span></div>
-            </div>
+            
+            <div id="counter-area"></div>
+            <button id="serve-btn" class="btn-large" onclick="serveOrder()">SERVE ORDER</button>
         </div>
     </div>
 
-    <div id="carb-station" class="screen">
-        <div style="text-align:center; margin-bottom: 20px;">
-            <h2>Mash Button to Carbonate!</h2>
-            <div style="font-size: 20px;">Target: <span id="target-carb">0</span>%</div>
-        </div>
-        <div id="carb-machine">
-            <div id="carb-meter"><div id="carb-fill"></div></div>
-            <button id="carb-btn" onmousedown="pumpCarb()">PUMP!</button>
-        </div>
-        <div style="margin-top: 20px; font-weight:bold;">Current: <span id="current-carb">0</span>%</div>
-    </div>
-
-    <div id="essence-station" class="screen">
-        <div id="flavor-controls">
-            <button class="flavor-btn" style="background:#ff7675;" onmousedown="startBlowing('Grapefruit')" onmouseup="stopBlowing()" onmouseleave="stopBlowing()">🌬️<br>Grapefruit</button>
-            <button class="flavor-btn" style="background:#55efc4;" onmousedown="startBlowing('Lime')" onmouseup="stopBlowing()" onmouseleave="stopBlowing()">🌬️<br>Lime</button>
-            <button class="flavor-btn" style="background:#fdcb6e;" onmousedown="startBlowing('Lemon')" onmouseup="stopBlowing()" onmouseleave="stopBlowing()">🌬️<br>Lemon</button>
-            <button class="flavor-btn" style="background:#a29bfe;" onmousedown="startBlowing('Berry')" onmouseup="stopBlowing()" onmouseleave="stopBlowing()">🌬️<br>Berry</button>
-        </div>
-
-        <div id="essence-cloud"></div>
+    <div id="shop-screen" class="screen">
+        <h1>Fizzer's Upgrades</h1>
+        <div style="text-align: center;">Spend your tips to unlock new tech!</div>
         
-        <div id="cup-area">
-            <div id="water-level"></div>
-        </div>
-
-        <div style="position: absolute; top: 120px; right: 20px; background: rgba(255,255,255,0.5); padding: 10px; border-radius: 10px;">
-            <div>Essence Level: <span id="essence-meter">0</span>%</div>
-        </div>
-
-        <div id="controls-bottom">
-            <div>
-                <label>Ice Amount:</label><br>
-                <input type="range" id="ice-slider" min="0" max="100" value="0">
+        <div class="shop-grid">
+            <div class="upgrade-card" id="card-crushed">
+                <h3>Crushed Ice Machine</h3>
+                <p>Allow customers to order Crushed Ice.</p>
+                <span class="price-tag">$50</span><br><br>
+                <button class="btn-large" style="font-size:16px; padding:10px 20px;" onclick="buyUpgrade('crushed')">BUY</button>
             </div>
-            <button class="btn" style="padding: 10px 20px; font-size: 18px;" onclick="serveDrink()">SERVE DRINK</button>
+
+            <div class="upgrade-card" id="card-blender">
+                <h3>Flavor Blender</h3>
+                <p>Allows mixing 2 flavors in one cup.</p>
+                <span class="price-tag">$100</span><br><br>
+                <button class="btn-large" style="font-size:16px; padding:10px 20px;" onclick="buyUpgrade('blender')">BUY</button>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px;">
+            <button class="btn-large" onclick="closeShop()">Back to Game</button>
         </div>
     </div>
 
-    <div id="result-overlay">
-        <h2>Customer Review</h2>
-        <div id="customer-result" class="character" style="transform: scale(0.8);">
-            <div class="head"><div class="face"><div class="eye left"></div><div class="eye right"></div><div class="mouth"></div></div></div>
-            <div class="body"></div>
-        </div>
-        <div id="quote-bubble">"It tastes like a battery!"</div>
-        <div style="display:flex; gap: 20px; text-align: left;">
-            <div>
-                <div>Carb Accuracy: <span id="res-carb">0</span>%</div>
-                <div>Flavor Match: <span id="res-flav">0</span>%</div>
-                <div>Ice Accuracy: <span id="res-ice">0</span>%</div>
-            </div>
-        </div>
-        <h1 style="color: #fdcb6e; margin-top: 10px;">Tip: $<span id="res-tip">0.00</span></h1>
-        <button class="btn" onclick="nextCustomer()">Next Customer</button>
-    </div>
-
-    <div id="shop-screen" class="screen" style="background: #fab1a0; align-items: center; justify-content: center; z-index: 250;">
-        <h1>The Essence Store</h1>
-        <div>Current Cash: $<span id="shop-money">0</span></div>
-        <div style="display:flex; gap: 20px; margin-top: 20px;">
-            <div style="background: white; padding: 20px; border-radius: 10px; text-align: center;">
-                <h3>Turbo Pump</h3>
-                <p>Carbonate 2x Faster</p>
-                <button class="btn" style="font-size: 16px;" onclick="buyUpgrade('pump', 50)">$50.00</button>
-            </div>
-            <div style="background: white; padding: 20px; border-radius: 10px; text-align: center;">
-                <h3>Pure Essence</h3>
-                <p>Flavor pays 1.5x Tips</p>
-                <button class="btn" style="font-size: 16px;" onclick="buyUpgrade('flavor', 100)">$100.00</button>
-            </div>
-        </div>
-        <button class="btn" style="margin-top: 40px; background: #636e72;" onclick="startDay()">Start Next Day</button>
+    <div id="feedback-overlay">
+        <h2>ORDER COMPLETE!</h2>
+        <div class="score-circle"><span id="score-val">100</span>%</div>
+        <div id="feedback-text" style="font-size: 20px; margin-bottom: 20px;">Perfect!</div>
+        <div style="font-size: 24px; color: var(--accent);">Tip: $<span id="tip-val">5</span></div>
+        <br>
+        <button class="btn-large" onclick="closeFeedback()">CONTINUE</button>
     </div>
 
 </div>
 
 <script>
-    // --- GAME STATE ---
+    // GAME STATE
     let money = 0;
     let day = 1;
-    let customersServed = 0;
-    let totalCustomers = 3; // Increases with levels
+    let currentCustomer = null;
+    let currentBuild = {
+        base: null,
+        mix: null,
+        ice: null,
+        color: null
+    };
     
-    // Upgrades
+    // UPGRADES STATE
     let upgrades = {
-        pumpSpeed: 2,
-        flavorMult: 1
+        crushedIce: false,
+        blender: false
     };
 
-    // Current Order Data
-    let order = null;
-    let build = {
-        carb: 0,
-        flavorType: null,
-        flavorIntensity: 0,
-        ice: 0
-    };
+    const FLAVORS = ['Pamplemousse', 'Lime', 'Lemon', 'Berry'];
+    const ICE_TYPES = ['Cubed']; 
 
-    // --- UTILS ---
-    const getEl = (id) => document.getElementById(id);
-    const switchStation = (id) => {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        if(id === 'order') getEl('order-station').classList.add('active');
-        if(id === 'carb') getEl('carb-station').classList.add('active');
-        if(id === 'essence') getEl('essence-station').classList.add('active');
-        
-        // Button Highlight
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        getEl('nav-'+id).classList.add('active');
-    };
+    // DOM ELEMENTS
+    const moneyDisplay = document.getElementById('money-display');
+    const dayDisplay = document.getElementById('day-display');
+    const screens = document.querySelectorAll('.screen');
+    const ticket = document.getElementById('ticket');
+    const cupLiquid = document.getElementById('cup-liquid');
+    const cupContainer = document.getElementById('cup-container');
 
-    // --- GAME LOOP ---
+    function showScreen(id) {
+        screens.forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
     function startGame() {
-        getEl('menu-screen').classList.remove('active');
-        getEl('station-nav').style.display = 'flex';
-        startDay();
+        showScreen('game-screen');
+        nextCustomer();
     }
 
-    function startDay() {
-        getEl('shop-screen').classList.remove('active');
-        switchStation('order');
-        day++;
-        customersServed = 0;
-        getEl('day-val').innerText = day;
+    function generateOrder() {
+        const base = FLAVORS[Math.floor(Math.random() * FLAVORS.length)];
+        let mix = "None";
         
-        // Level logic: More customers per day
-        totalCustomers = 2 + day; 
-        
-        nextCustomer(true); // true = start of day
-    }
-
-    function nextCustomer(first = false) {
-        getEl('result-overlay').style.display = 'none';
-        
-        if(!first && customersServed >= totalCustomers) {
-            // End of day
-            openShop();
-            return;
+        // If blender upgrade bought, 50% chance they want a mix
+        if(upgrades.blender && Math.random() > 0.5) {
+             let mixC = FLAVORS[Math.floor(Math.random() * FLAVORS.length)];
+             if(mixC !== base) mix = mixC;
         }
 
-        // Reset Build
-        build = { carb: 0, flavorType: null, flavorIntensity: 0, ice: 0 };
-        getEl('carb-fill').style.height = '0%';
-        getEl('current-carb').innerText = '0';
-        getEl('water-level').style.height = '0%';
-        getEl('water-level').style.backgroundColor = '#dfe6e9';
-        getEl('essence-meter').innerText = '0';
-        getEl('ice-slider').value = 0;
-        getEl('ticket-display').style.display = 'none';
-        getEl('take-order-btn').style.display = 'block';
+        // Determine Ice
+        let availableIce = ['Cubed'];
+        if(upgrades.crushedIce) availableIce.push('Crushed');
+        const ice = availableIce[Math.floor(Math.random() * availableIce.length)];
 
-        // Spawn Customer (Visual)
-        const cust = getEl('customer');
-        cust.style.display = 'block';
-        // Randomize Square Colors
-        cust.querySelector('.head').style.backgroundColor = `hsl(${Math.random()*360}, 70%, 80%)`;
-        cust.querySelector('.body').style.backgroundColor = `hsl(${Math.random()*360}, 50%, 50%)`;
-        
-        // Generate Order Logic
-        const flavors = ['Grapefruit', 'Lime', 'Lemon', 'Berry'];
-        const sizes = ['Small', 'Medium', 'Large'];
-        const intensities = ['Hint', 'Whisper', 'Memory', 'Thought'];
-        
-        order = {
-            size: sizes[Math.floor(Math.random()*sizes.length)],
-            ice: Math.floor(Math.random()*100),
-            carb: Math.floor(Math.random()*60) + 40, // 40-100%
-            flavor: flavors[Math.floor(Math.random()*flavors.length)],
-            intensity: Math.floor(Math.random() * 80) + 10 // 10-90%
-        };
-
-        customersServed++;
+        return { base, mix, ice };
     }
 
-    function takeOrder() {
-        getEl('take-order-btn').style.display = 'none';
-        getEl('ticket-display').style.display = 'block';
+    function nextCustomer() {
+        resetCup();
+        document.getElementById('next-customer-btn').style.display = 'none';
+        document.getElementById('ticket').style.display = 'block';
         
-        // Fill Ticket
-        getEl('t-num').innerText = Math.floor(Math.random()*900)+100;
-        getEl('t-size').innerText = order.size;
-        getEl('t-ice').innerText = order.ice + "%";
-        getEl('t-carb').innerText = order.carb + "%";
-        getEl('t-flavor').innerText = order.flavor;
+        currentCustomer = generateOrder();
         
-        // Map intensity number to text
-        let intText = "Hint";
-        if(order.intensity > 30) intText = "Whisper";
-        if(order.intensity > 60) intText = "Shout";
-        getEl('t-intensity').innerText = intText + ` (${order.intensity}%)`;
-        getEl('target-carb').innerText = order.carb;
-        
-        // Set Cup Size Visually
-        let h = "180px";
-        if(order.size === 'Small') h = "140px";
-        if(order.size === 'Large') h = "220px";
-        getEl('cup-area').style.height = h;
+        // Render Ticket
+        document.getElementById('ticket-id').innerText = Math.floor(Math.random() * 900) + 100;
+        document.getElementById('req-base').innerText = currentCustomer.base;
+        document.getElementById('req-mix').innerText = currentCustomer.mix;
+        document.getElementById('req-ice').innerText = currentCustomer.ice;
     }
 
-    // --- STATIONS LOGIC ---
-    
-    // Carbonation
-    function pumpCarb() {
-        if(build.carb >= 100) return;
-        build.carb += upgrades.pumpSpeed;
-        if(build.carb > 100) build.carb = 100;
-        getEl('carb-fill').style.height = build.carb + "%";
-        getEl('current-carb').innerText = Math.floor(build.carb);
-        
-        // Visual bubbles
-        let b = document.createElement('div');
-        b.className = 'bubble';
-        b.style.left = Math.random()*100 + "%";
-        getEl('carb-meter').appendChild(b);
-        setTimeout(() => b.remove(), 1000);
-    }
-
-    // Essence
-    let blowInterval = null;
-    function startBlowing(flavor) {
-        if(build.flavorType && build.flavorType !== flavor) {
-            alert("You already blew " + build.flavorType + " on this!");
-            return;
-        }
-        build.flavorType = flavor;
-        
-        // Visual Cloud
-        const cloud = getEl('essence-cloud');
-        cloud.innerText = flavor + " Essence";
-        cloud.style.backgroundColor = "rgba(255,255,255,0.6)";
-        
-        // Logic
-        blowInterval = setInterval(() => {
-            if(build.flavorIntensity >= 100) return;
-            build.flavorIntensity += 0.5;
-            getEl('essence-meter').innerText = Math.floor(build.flavorIntensity);
-            
-            // Fill cup slightly with water to show progress
-            getEl('water-level').style.height = "80%"; // Base water level
-        }, 50);
-    }
-
-    function stopBlowing() {
-        clearInterval(blowInterval);
-        getEl('essence-cloud').style.backgroundColor = "rgba(255,255,255,0.0)";
-        getEl('essence-cloud').innerText = "";
-    }
-
-    function serveDrink() {
-        build.ice = parseInt(getEl('ice-slider').value);
-        
-        // Calculate Score
-        // 1. Carb Score
-        let carbDiff = Math.abs(order.carb - build.carb);
-        let carbScore = Math.max(0, 100 - (carbDiff * 2));
-
-        // 2. Flavor Score
-        let flavScore = 0;
-        if(build.flavorType === order.flavor) {
-            let intDiff = Math.abs(order.intensity - build.flavorIntensity);
-            flavScore = Math.max(0, 100 - (intDiff * 2));
-        }
-
-        // 3. Ice Score
-        let iceDiff = Math.abs(order.ice - build.ice);
-        let iceScore = Math.max(0, 100 - (iceDiff));
-
-        let totalScore = (carbScore + flavScore + iceScore) / 3;
-        
-        // Tip Calculation
-        let baseTip = 5.00;
-        let finalTip = (baseTip * (totalScore/100)) * upgrades.flavorMult;
-        money += finalTip;
-        getEl('money-val').innerText = money.toFixed(2);
-
-        // Show Results
-        getEl('res-carb').innerText = Math.floor(carbScore);
-        getEl('res-flav').innerText = Math.floor(flavScore);
-        getEl('res-ice').innerText = Math.floor(iceScore);
-        getEl('res-tip').innerText = finalTip.toFixed(2);
-
-        // Funny Quotes
-        const quotes = [
-            `"It tastes like I'm sitting near a basket of ${build.flavorType || 'nothing'}."`,
-            `"Hints of static TV and a ghost of a ${build.flavorType || 'fruit'}."`,
-            `"It tastes like someone yelled '${build.flavorType || 'WATER'}' from the basement."`,
-            `"Deliciously disappointing, just like I ordered."`
-        ];
-        
-        let q = quotes[Math.floor(Math.random()*quotes.length)];
-        if(flavScore < 30) q = "\"This has too much flavor! I wanted faint disappointment!\"";
-        
-        getEl('quote-bubble').innerText = q;
-        getEl('result-overlay').style.display = 'flex';
-    }
-
-    // --- SHOP LOGIC ---
-    function openShop() {
-        getEl('shop-money').innerText = money.toFixed(2);
-        getEl('shop-screen').classList.add('active');
-        getEl('station-nav').style.display = 'none';
-    }
-
-    function buyUpgrade(type, cost) {
-        if(money >= cost) {
-            money -= cost;
-            getEl('shop-money').innerText = money.toFixed(2);
-            getEl('money-val').innerText = money.toFixed(2);
-            
-            if(type === 'pump') {
-                upgrades.pumpSpeed += 2;
-                alert("Pump Upgraded!");
-            }
-            if(type === 'flavor') {
-                upgrades.flavorMult += 0.5;
-                alert("Premium Essence Purchased!");
-            }
+    // BUILD STATION LOGIC
+    function addFlavor(flavor, colorCode) {
+        // Mixing Logic
+        if(!currentBuild.base) {
+            // First pour (Base)
+            currentBuild.base = flavor;
+            currentBuild.color = colorCode;
+            cupLiquid.style.height = "80%";
+            cupLiquid.style.backgroundColor = colorCode;
+        } else if (upgrades.blender && !currentBuild.mix && currentBuild.base !== flavor) {
+            // Second pour (Mix)
+            currentBuild.mix = flavor;
+            // Mix colors visually (simple CSS gradient)
+            cupLiquid.style.background = `linear-gradient(to top, ${currentBuild.color}, ${colorCode})`;
         } else {
-            alert("Not enough money!");
+            // Already full or no blender
+            // Shake effect to show error?
+            const cup = document.getElementById('cup-container');
+            cup.style.transform = "translateX(-55%)";
+            setTimeout(() => cup.style.transform = "translateX(-50%)", 100);
         }
+    }
+
+    function addIce(type) {
+        if(currentBuild.ice) return; // Ice already added
+        currentBuild.ice = type;
+
+        // Visuals
+        if(type === 'Cubed') {
+            for(let i=0; i<5; i++) {
+                let cube = document.createElement('div');
+                cube.className = 'ice-cube';
+                cube.style.left = (Math.random() * 80 + 10) + 'px';
+                cube.style.bottom = (Math.random() * 100 + 10) + 'px';
+                cube.style.transform = `rotate(${Math.random()*360}deg)`;
+                cupContainer.appendChild(cube);
+            }
+        } else if (type === 'Crushed') {
+            for(let i=0; i<30; i++) {
+                let ice = document.createElement('div');
+                ice.className = 'ice-crushed';
+                ice.style.left = (Math.random() * 90) + '%';
+                ice.style.bottom = (Math.random() * 80 + 10) + '%';
+                cupContainer.appendChild(ice);
+            }
+        }
+    }
+
+    function resetCup() {
+        currentBuild = { base: null, mix: null, ice: null, color: null };
+        cupLiquid.style.height = "0%";
+        cupLiquid.style.background = "none";
+        // Remove ice
+        const iceElements = document.querySelectorAll('.ice-cube, .ice-crushed');
+        iceElements.forEach(el => el.remove());
+    }
+
+    function serveOrder() {
+        if(!currentBuild.base) return; // Can't serve empty cup
+
+        let score = 0;
+        let maxScore = 3; // Base, Mix, Ice
+
+        // Check Base
+        if(currentBuild.base === currentCustomer.base) score++;
+        
+        // Check Mix
+        const customerWantedMix = (currentCustomer.mix !== 'None');
+        const buildHasMix = (currentBuild.mix !== null);
+        
+        if(!customerWantedMix && !buildHasMix) score++;
+        else if(customerWantedMix && buildHasMix && currentBuild.mix === currentCustomer.mix) score++;
+
+        // Check Ice
+        if(currentBuild.ice === currentCustomer.ice) score++;
+
+        // Calculate Percentage
+        let percent = Math.round((score / maxScore) * 100);
+        let tip = Math.floor((percent / 100) * 15); // Max $15 tip
+        
+        money += tip;
+        moneyDisplay.innerText = money;
+
+        // Show Feedback
+        const overlay = document.getElementById('feedback-overlay');
+        document.getElementById('score-val').innerText = percent;
+        document.getElementById('tip-val').innerText = tip;
+        
+        let text = "Terrible!";
+        if(percent > 50) text = "Okay.";
+        if(percent > 80) text = "Tasty!";
+        if(percent === 100) text = "Perfect!";
+        document.getElementById('feedback-text').innerText = text;
+
+        overlay.style.display = 'flex';
+    }
+
+    function closeFeedback() {
+        document.getElementById('feedback-overlay').style.display = 'none';
+        
+        // Every 3 orders, open shop? Or just button?
+        // Let's just offer shop button after every order for simplicity
+        if(confirm("Visit the Upgrade Shop?")) {
+            showScreen('shop-screen');
+        } else {
+            nextCustomer();
+        }
+    }
+
+    // SHOP LOGIC
+    function buyUpgrade(item) {
+        if(item === 'crushed') {
+            if(money >= 50 && !upgrades.crushedIce) {
+                money -= 50;
+                upgrades.crushedIce = true;
+                document.getElementById('btn-crushed').style.display = 'inline-flex';
+                document.getElementById('card-crushed').classList.add('purchased');
+                document.getElementById('card-crushed').querySelector('button').innerText = "OWNED";
+            }
+        } else if (item === 'blender') {
+            if(money >= 100 && !upgrades.blender) {
+                money -= 100;
+                upgrades.blender = true;
+                document.getElementById('card-blender').classList.add('purchased');
+                document.getElementById('card-blender').querySelector('button').innerText = "OWNED";
+            }
+        }
+        moneyDisplay.innerText = money;
+    }
+
+    function closeShop() {
+        showScreen('game-screen');
+        nextCustomer();
     }
 
 </script>
